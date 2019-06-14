@@ -98,11 +98,15 @@ class IpcComponentSource {
       : metadata_(metadata), file_(file) {}
 
   Status GetBuffer(int buffer_index, std::shared_ptr<Buffer>* out) {
+    auto buffer_index_u = static_cast<uint32_t>(buffer_index);
     auto buffers = metadata_->buffers();
     if (buffers == nullptr) {
       return Status::IOError("Buffers-pointer of flatbuffer-encoded RecordBatch is null.");
     }
-    const flatbuf::Buffer* buffer = buffers->Get(buffer_index);
+    if (buffer_index_u >= buffers->Length()) {
+      return Status::IOError("buffer_index out of range.");
+    }
+    const flatbuf::Buffer* buffer = buffers->Get(buffer_index_u);
 
     if (buffer->length() == 0) {
       *out = nullptr;
