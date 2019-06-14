@@ -113,6 +113,9 @@ class IpcComponentSource {
 
   Status GetFieldMetadata(int field_index, ArrayData* out) {
     auto nodes = metadata_->nodes();
+    if (nodes == nullptr) {
+      return Status::IOError("Nodes-pointer of flatbuffer-encoded Table is null.");
+    }
     // pop off a field
     if (field_index >= static_cast<int>(nodes->size())) {
       return Status::Invalid("Ran out of field metadata, likely malformed");
