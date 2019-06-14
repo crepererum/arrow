@@ -739,7 +739,12 @@ Status FieldFromFlatbuffer(const flatbuf::Field* field, DictionaryMemo* dictiona
     // based on the DictionaryEncoding metadata and record in the
     // dictionary_memo
     std::shared_ptr<DataType> index_type;
-    RETURN_NOT_OK(IntFromFlatbuffer(encoding->indexType(), &index_type));
+    auto int_data = encoding->indexType();
+    if (int_data == nullptr) {
+      return Status::IOError(
+        "indexType-pointer in custom metadata of flatbuffer-encoded DictionaryEncoding is null.");
+    }
+    RETURN_NOT_OK(IntFromFlatbuffer(int_data, &index_type));
     type = ::arrow::dictionary(index_type, type, encoding->isOrdered());
     *out = ::arrow::field(field->name()->str(), type, field->nullable(), metadata);
     RETURN_NOT_OK(dictionary_memo->AddField(encoding->id(), *out));
