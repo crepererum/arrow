@@ -739,7 +739,11 @@ Status FieldFromFlatbuffer(const flatbuf::Field* field, DictionaryMemo* dictiona
     *out = ::arrow::field(field->name()->str(), type, field->nullable(), metadata);
     RETURN_NOT_OK(dictionary_memo->AddField(encoding->id(), *out));
   } else {
-    *out = ::arrow::field(field->name()->str(), type, field->nullable(), metadata);
+    auto name = field->name();
+    if (name == nullptr) {
+      return Status::IOError("Name-pointer of flatbuffer-encoded Field is null.");
+    }
+    *out = ::arrow::field(name->str(), type, field->nullable(), metadata);
   }
   return Status::OK();
 }
