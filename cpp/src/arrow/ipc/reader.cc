@@ -98,7 +98,11 @@ class IpcComponentSource {
       : metadata_(metadata), file_(file) {}
 
   Status GetBuffer(int buffer_index, std::shared_ptr<Buffer>* out) {
-    const flatbuf::Buffer* buffer = metadata_->buffers()->Get(buffer_index);
+    auto buffers = metadata_->buffers();
+    if (buffers == nullptr) {
+      return Status::IOError("Buffers-pointer of flatbuffer-encoded RecordBatch is null.");
+    }
+    const flatbuf::Buffer* buffer = buffers->Get(buffer_index);
 
     if (buffer->length() == 0) {
       *out = nullptr;
