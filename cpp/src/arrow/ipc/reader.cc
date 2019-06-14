@@ -104,9 +104,9 @@ class IpcComponentSource {
       *out = nullptr;
       return Status::OK();
     } else {
-      DCHECK(BitUtil::IsMultipleOf8(buffer->offset()))
-          << "Buffer " << buffer_index
-          << " did not start on 8-byte aligned offset: " << buffer->offset();
+      if (!BitUtil::IsMultipleOf8(buffer->offset())) {
+        return Status::IOError("Buffer did not start on 8-byte offset");
+      }
       return file_->ReadAt(buffer->offset(), buffer->length(), out);
     }
   }
